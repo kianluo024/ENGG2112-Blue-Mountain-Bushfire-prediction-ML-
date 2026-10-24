@@ -1,195 +1,110 @@
 # Blue Mountains Bushfire Prediction
 
-ENGG2112 student research prototype for predicting **next-day eligible VIIRS
-active-fire detections** in Blue Mountains National Park grid cells.
+ENGG2112 research prototype for **next-day eligible VIIRS active-fire detections**
+in Blue Mountains National Park grid cells. Kian's ML work is complete and
+packaged for technical review and integration into the group report.
 
-The target is fire presence detected by a satellite, including continuing fire.
-It is not a confirmed ignition, fire-spread simulation or operational warning.
+The target includes continuing fire. It is not confirmed ignition, fire spread
+or severity. The final evaluation does **not** establish reliable warning
+probabilities or an operational alert system.
 
-## Current stage
+## Start here
 
-Stage 1 established data acceptance and a protected temporal holdout. Stage 2
-fitted one prespecified core-feature logistic regression and compared it
-with prevalence and persistence on validation data only. Development stages
-1-6 did not generate final-test predictions or scores.
-Stage 3 examines the saved validation errors and source-observation caveats,
-without refitting or changing any labels.
-Stage 4 adds only the audited same-day fire flag to the logistic inputs, using
-the same rows and settings. It improves over the conditions-only model but has
-not established a practical improvement over persistence.
-Stage 5 has completed the first matched-input XGBoost comparison. The 17-input
-variant has validation AP 0.7283 versus persistence AP 0.7056, but exactly the
-same binary alerts at the fixed threshold of 0.5. Time-aware stability checks
-are now complete: early stopping is isolated from outer checking outcomes,
-but sparse early positives prevent two XGBoost fits, and the available windows
-do not establish stable improvement over persistence.
-Stage 6 has checked probability reliability and two recall-target policies.
-Sigmoid calibration is not adopted: the longer temporal check worsens, while
-the improving recent check has only one calibration day and one assessment day.
-Two exact raw-score cutoffs are recorded as provisional research choices;
-trusted probability percentages and operational alert thresholds remain
-unestablished.
-Stage 7 is complete. The final protocol, model artifacts and both cutoffs were
-frozen in commit `ef45cdf` before the single authorised final release. On 7,783
-held-out cell-days with 49 positive targets, the 80% selection-recall policy
-achieves 32.7% recall with 39 false alerts; the 90% policy achieves 69.4% recall
-with 2,434 false alerts. Neither development recall target transfers to this
-period. XGBoost 17 AP is 0.1062, persistence AP is 0.0992 and the prespecified
-logistic 17 comparison has AP 0.2113. These findings do not establish a reliable
-warning system or calibrated probabilities. No model or cutoff was adjusted
-after release; future tuning requires new independent evaluation data.
+| Reader | Entry point |
+| --- | --- |
+| Group members and report editor | [ML handover](handover/README.md) |
+| Report writer | [English ML contribution](handover/group_report/ml_sections.md), [PDF](handover/group_report/ml_contribution.pdf), [integration guide](handover/group_report/integration_guide.md) |
+| Code reviewer | [Source and method map](handover/technical/source_map.md), [code index](bushfire_ml/README.md) |
+| Reproduction reviewer | [Runbook](handover/technical/runbook.md), [evidence manifest](handover/manifest.json) |
+| Results reviewer | [Final report](reports/final_holdout.md), [final interpretation](docs/final_findings.md) |
 
-## Remaining milestones
+## Final result
 
-| Stage | Deliverable | Status |
-| --- | --- | --- |
-| 1. Data acceptance and temporal separation | Audited development data and sealed final test | Complete |
-| 2. Simple baselines | Prevalence, persistence and core logistic comparison | Complete |
-| 3. Error analysis | Error groups, input shifts and observation-quality concerns | Complete |
-| 4. Current-fire input comparison | Matched 16-input and 17-input logistic experiments | Complete |
-| 5. Main model comparison | Matched-input XGBoost comparison and temporal checks; stability remains unestablished | Complete |
-| 6. Probability and alert policy | Reliability checks complete; calibration unadopted; provisional 80%/90% recall policies documented | Complete with limited evidence |
-| 7. Frozen final evaluation | Committed freeze and single final evaluation; both policies and all comparisons reported | Complete |
-| 8. ML handover | Clear code, reproducible instructions, figures, limitations and review notes | In progress |
+The complete pipeline was frozen in commit `ef45cdf` before a single authorised
+temporal evaluation. The feature dates were 1 January to 29 June 2020:
+7,783 cell-days, 43 cells, 181 dates and 49 positive next-day targets.
 
-Related development experiments can be run together and discussed at stage
-boundaries. Final evaluation follows pipeline freeze. Calibration claims depend
-on the amount and quality of independent development evidence.
+| Frozen policy | True positives | False positives | False negatives | Recall | Precision |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 80% development selection-recall target | 16 | 39 | 33 | 32.7% | 29.1% |
+| 90% development selection-recall target | 34 | 2,434 | 15 | 69.4% | 1.4% |
+| Persistence | 16 | 39 | 33 | 32.7% | 29.1% |
 
-Code clarity, evaluation integrity and detailed English commit messages are
-documented in [the project working agreements](AGENTS.md).
+The names describe development selection constraints, not achieved final
+recall. XGBoost 17 AP was 0.1062, persistence AP 0.0992 and the prespecified
+logistic 17 comparison AP 0.2113. No model, feature, calibration setting or
+cutoff was changed after release. Counts are cell-days, not independent fires.
 
-- [Frozen research protocol](config/protocol_v1.json)
-- [Development audit](reports/development_audit.md)
-- [Partition manifest and hashes](reports/partition_manifest.json)
-- [Lesson 1: data, labels and the holdout](docs/lesson_01_data_and_holdout.md)
-- [Lesson 2: establish simple baselines](docs/lesson_02_baselines.md)
-- [Baseline validation results](reports/baseline_validation.md)
-- [Lesson 3: understand the errors](docs/lesson_03_error_analysis.md)
-- [Baseline error analysis](reports/baseline_error_analysis.md)
-- [Lesson 4: add current fire fairly](docs/lesson_04_current_fire.md)
-- [Current-fire comparison](reports/current_fire_comparison.md)
-- [Lesson 5: understand XGBoost](docs/lesson_05_xgboost.md)
-- [Matched-input XGBoost results](reports/xgboost_comparison.md)
-- [Lesson 6: temporal stability and honest limits](docs/lesson_06_temporal_stability.md)
-- [Temporal diagnostics and forward-window results](reports/temporal_stability.md)
-- [Lesson 7: probability reliability and reminder cutoffs](docs/lesson_07_probability_and_thresholds.md)
-- [Probability diagnostics and threshold trade-offs](reports/probability_reliability.md)
-- [Draft research model and exact cutoffs](reports/draft_probability_policy.json)
-- [Lesson 8: freeze and perform one final evaluation](docs/lesson_08_frozen_final_evaluation.md)
-- [Final evaluation rules](config/final_evaluation_v1.json)
-- [Committed final freeze](reports/final_freeze.json)
-- [Final results and figure](reports/final_holdout.md)
-- [One-time release receipt](reports/final_release.json)
-- [Final interpretation and oral review notes](docs/final_findings.md)
+The raw scores are not validated probabilities. A no-alert reference achieves
+99.37% accuracy while missing every positive target. See the
+[complete aggregate results](reports/final_holdout.json),
+[committed freeze](reports/final_freeze.json) and
+[one-time release receipt](reports/final_release.json).
 
-All repository-authored text, code comments and report figures use English.
-Raw data, row-level development data and holdout answers stay local.
+## Repository layout
 
-## Local setup
+| Directory | Purpose |
+| --- | --- |
+| [bushfire_ml/](bushfire_ml/README.md) | Frozen data guards, fitting, evaluation and experiment runners |
+| [config/](config/README.md) | Versioned protocol and experiment settings |
+| [reports/](reports/README.md) | Original chronological evidence, aggregate JSON, reports and figures |
+| [docs/](docs/README.md) | Teaching notes and development decisions |
+| [tests/](tests/README.md) | Synthetic/unit checks for leakage, chronology and release integrity |
+| [handover/](handover/README.md) | Classified technical handover and report-ready English material |
+| [tools/](tools/README.md) | Aggregate-only packaging and verification; no model fitting or raw-data access |
+| `.local_data/` | Ignored private data, row-level predictions and local model snapshots |
 
-Python 3.12 was used for verification. From this repository on Windows:
+Frozen source files and historical reports remain in their original paths.
+The handover adds navigation and exports without rewriting the evaluation
+history. All repository-authored content and commit messages use English.
+
+## Review without private data
+
+Use Python 3.12 and the recorded versions in [requirements.txt](requirements.txt).
+On Windows, replace `python` below with `.\.venv\Scripts\python.exe` when using
+the existing local environment.
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m bushfire_ml.prepare --dataset-root "C:\path\to\dataset"
-.\.venv\Scripts\python.exe -m bushfire_ml.audit
-.\.venv\Scripts\python.exe -m bushfire_ml.baselines
-.\.venv\Scripts\python.exe -m bushfire_ml.error_analysis
-.\.venv\Scripts\python.exe -m bushfire_ml.current_fire
-.\.venv\Scripts\python.exe -m bushfire_ml.xgboost_experiment
-.\.venv\Scripts\python.exe -m bushfire_ml.temporal_stability
-.\.venv\Scripts\python.exe -m bushfire_ml.probability_experiment
+.\.venv\Scripts\python.exe tools/verify_handover.py
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m bushfire_ml.final_release
 ```
 
-Final release is a separate authorised step. First run
-`python -m bushfire_ml.freeze_final`, review and commit the complete freeze,
-then run `python -m bushfire_ml.final_release` with the same local environment.
-The second command parses the protected final outcomes once. Later calls return
-the saved aggregate result without another holdout parse or prediction pass.
-Do not change the frozen pipeline after release; further tuning needs new
-independent evaluation data. See Lesson 8 for the exact procedure and caveats.
-This checkout has completed that release. A clone with the published receipt
-and aggregate report also returns cached results without needing the private
-model snapshots or raw data. Reformatting those results is not another blind test.
+The last command returns the **published cached result**. It does not reopen
+the holdout or predict again, including in a clone without `.local_data/`.
+Packaging can also be regenerated from aggregate reports; see the runbook.
+Optional PDF-export dependencies are separate from the frozen ML environment.
 
-`--dataset-root` must point to the supplied directory containing `model_ready`,
-`raw`, `processed` and the supplier metadata. The original dataset is never
-modified. The preparation command preserves an existing seal and refuses to
-silently replace data or change the protocol after sealing.
+## Evaluation boundaries
 
-## Separation of development and evaluation
+The supplied future-test boundary was preserved. Seven-day gaps separate
+development partitions; the first two feature days are excluded from fitting
+because of rainfall warm-up. All cells from a date stay together. The original
+[protocol](config/protocol_v1.json) and [partition manifest](reports/partition_manifest.json)
+record the exact rules. The final model uses 17 reviewed inputs, as recorded
+in the later frozen manifest; the original protocol is preserved as history.
 
-| Partition | UTC feature dates | Rows |
-| --- | --- | ---: |
-| Training | 2019-07-01 to 2019-12-08 | 6,923 |
-| Gap | 2019-12-09 to 2019-12-15 | 301 |
-| Validation | 2019-12-16 to 2019-12-24 | 387 |
-| Gap | 2019-12-25 to 2019-12-31 | 301 |
-| Final test, sealed | 2020-01-01 to 2020-06-29 | 7,783 |
+This is a protected **retrospective temporal holdout**, with earlier aggregate
+disclosures and dependent ongoing events, not independent-season or double-blind
+validation. Retrospective input publication latency is not reproduced. The
+initial seal records preparation-time status; the release receipt records the
+later final evaluation. Do not delete that receipt, retune on this exposed test,
+or present a repeat as a new blind result. Further modelling needs new independent
+evaluation data.
 
-Every target date is one UTC day after its feature date. All cells from one
-feature date remain together. Cells with less than 10% park coverage are excluded
-by a predefined geometric rule, leaving 43 of 52 cells.
+## Completion and remaining group work
 
-The supplied dataset already reserved January onward for testing. This protocol
-preserves that boundary and adds seven-day development gaps before any fitting.
-It deliberately avoids a random row split and the team's proposed interleaved
-weekly split. Seven-day gaps reduce adjacency; they do not establish independence
-between long-lived fire events or between locations.
+ML data acceptance, baselines, error analysis, matched model comparisons,
+temporal checks, probability/threshold assessment, final freeze/evaluation and
+handover are complete. The ML contribution does not claim that the entire group
+submission is complete. The editor still needs the confirmed team details,
+study-area/data documentation, literature discussion, agreed recommendations
+and member verification. The integration guide maps these to the supplied rubric.
 
-The supplier's README already disclosed aggregate test-label counts, and team
-notes describe the full season. This is a protected **retrospective temporal
-holdout**, not a double-blind study or a new-season validation. Test-label
-summaries and scores are not produced by these development tools.
-
-The holdout is stored separately under ignored `.local_data/holdout/`.
-`load_development` rejects any partition except `train` and `validation`.
-File hashes detect later changes. The one authorised final release has now
-completed; original seal records are preserved as historical preparation
-evidence and the release receipt records the later evaluation status.
-This separation prevents accidental development reuse;
-it is not encryption or an access-control boundary. For stronger independence,
-a teammate can retain the test file and run the final frozen evaluation.
-
-## Current findings and next lesson
-
-The initial logistic baseline has validation AP 0.3716, below the constant-score
-reference of 0.4134. Persistence has AP 0.7056. At the fixed diagnostic threshold
-of 0.5, logistic regression gives 92 true positives, 140 false positives and 68
-false negatives. It has not established an improvement on these comparisons.
-This does not prove that environmental features lack predictive information.
-
-Error analysis, the current-fire comparison, temporal checks, the probability/
-threshold assessment and the single frozen final evaluation are complete.
-The remaining milestone is the ML handover and integration with the group
-report. The calibration candidate is not adopted and neither frozen cutoff
-establishes an operational warning service. The final test must not become
-a tuning set for further iterations of this project.
-Continue to use explicit input whitelists and training-only preprocessing. Report average precision,
-precision/recall, probability quality and alert burden. Do not optimise accuracy
-alone or select a test period because it gives a preferred score.
-
-The first approved model uses 16 weather and terrain features. The additional
-audited same-day `fire_today` flag is approved for the 17-input comparison.
-The other rainfall and current-fire additions remain candidate experiments.
-The full extended feature set is blocked until its warm-up and unknown
-dry-history treatment are documented.
-
-The desired probability output is `100 * P(next-day eligible detection)`.
-Development-only checks do not yet establish trustworthy percentages, so the
-draft labels its output an experimental model score. Multiplication by 100
-does not make an alert reliable. Exact research cutoffs remain on the 0-1 scale;
-neither their recall targets nor future calibration improvements are guaranteed.
-
-## References and disclosure
-
-- [scikit-learn: avoiding data leakage](https://scikit-learn.org/stable/common_pitfalls.html#data-leakage)
-- [scikit-learn: time-series evaluation](https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-of-time-series-data)
-- [scikit-learn: probability calibration](https://scikit-learn.org/stable/modules/calibration.html)
-
-Source checks, methodological limits and AI-assisted work are recorded in the
-audit and lesson notes. Team members must review the work and keep their own
-prompt/output and verification records for the course's AI-use appendix.
+The supplied course material requires a PDF report with a public code link,
+at most ten body pages, and an AI-use appendix for substantive assistance.
+Keep prompts/outputs and record each member's actual verification. The
+[working agreements](AGENTS.md) and [AI disclosure record](handover/group_report/ai_use_appendix.md)
+make these responsibilities explicit.
