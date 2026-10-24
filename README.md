@@ -17,6 +17,10 @@ without refitting or changing any labels.
 Stage 4 adds only the audited same-day fire flag to the logistic inputs, using
 the same rows and settings. It improves over the conditions-only model but has
 not established a practical improvement over persistence.
+Stage 5 has completed the first matched-input XGBoost comparison. The 17-input
+variant has validation AP 0.7283 versus persistence AP 0.7056, but exactly the
+same binary alerts at the fixed threshold of 0.5. Time-aware stability checks
+remain pending, and no final-test evaluation has been performed.
 
 ## Remaining milestones
 
@@ -26,7 +30,7 @@ not established a practical improvement over persistence.
 | 2. Simple baselines | Prevalence, persistence and core logistic comparison | Complete |
 | 3. Error analysis | Error groups, input shifts and observation-quality concerns | Complete |
 | 4. Current-fire input comparison | Matched 16-input and 17-input logistic experiments | Complete |
-| 5. Main model comparison | XGBoost with matched inputs, limited time-aware development checks, preserved baselines | Pending |
+| 5. Main model comparison | First matched-input XGBoost comparison complete; time-aware stability checks remain | In progress |
 | 6. Probability and alert policy | Development-only reliability checks, justified calibration design and threshold trade-offs | Pending |
 | 7. Frozen final evaluation | Evaluate the chosen complete pipeline once on the protected temporal test | Pending |
 | 8. ML handover | Clear code, reproducible instructions, figures, limitations and review notes | In progress |
@@ -48,6 +52,8 @@ documented in [the project working agreements](AGENTS.md).
 - [Baseline error analysis](reports/baseline_error_analysis.md)
 - [Lesson 4: add current fire fairly](docs/lesson_04_current_fire.md)
 - [Current-fire comparison](reports/current_fire_comparison.md)
+- [Lesson 5: understand XGBoost](docs/lesson_05_xgboost.md)
+- [Matched-input XGBoost results](reports/xgboost_comparison.md)
 
 All repository-authored text, code comments and report figures use English.
 Raw data, row-level development data and holdout answers stay local.
@@ -64,6 +70,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m bushfire_ml.baselines
 .\.venv\Scripts\python.exe -m bushfire_ml.error_analysis
 .\.venv\Scripts\python.exe -m bushfire_ml.current_fire
+.\.venv\Scripts\python.exe -m bushfire_ml.xgboost_experiment
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 

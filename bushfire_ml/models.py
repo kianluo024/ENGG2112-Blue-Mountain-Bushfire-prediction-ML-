@@ -25,3 +25,28 @@ def fit_logistic(training: pd.DataFrame, config: dict) -> Pipeline:
         warnings.simplefilter("error", ConvergenceWarning)
         pipeline.fit(predictors, labels)
     return pipeline
+
+
+def fit_xgboost(training: pd.DataFrame, validation: pd.DataFrame, config: dict, feature_set: str):
+    """Fit shallow boosted trees; validation selects boosting length only."""
+    from sklearn.metrics import average_precision_score
+    from xgboost import XGBClassifier
+    from xgboost.callback import EarlyStopping
+
+    if not pd.to_datetime(training.target_date).max() < pd.to_datetime(validation.feature_date).min():
+        raise ValueError("Training outcomes must precede validation feature dates")
+    labels = training.fire_positive.astype(int)
+    if set(labels.unique()) != {0, 1} or set(validation.fire_positive.unique()) != {0, 1}:
+        raise ValueError("Both classes are needed in training and early-stopping data")
+    train_x = model_matrix(training, feature_set)
+    validation_x = model_matrix(validation, feature_set)
+    stopping = config["early_stopping"]
+    if stopping["metric"] != "average_precision_score" or not stopping["maximize"]:
+        raise ValueError("Early stopping must maximise the reported AP definition")
+    callback = EarlyStopping(rounds=stopping["rounds"], metric_name="average_precision_score",
+                             data_name="validation_1", maximize=True, save_best=stopping["save_best"])
+    model = XGBClassifier(**config["xgboost"], eval_metric=average_precision_score,
+                          scale_pos_weight=float(labels.eq(0).sum()/labels.eq(1).sum()),
+                          callbacks=[callback])
+    model.fit(train_x, labels, eval_set=[(train_x, labels), (validation_x, validation.fire_positive)], verbose=False)
+    return model
