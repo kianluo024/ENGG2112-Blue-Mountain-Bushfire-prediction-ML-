@@ -24,6 +24,12 @@ are now complete: early stopping is isolated from outer checking outcomes,
 but sparse early positives prevent two XGBoost fits, and the available windows
 do not establish stable improvement over persistence. No final-test evaluation
 has been performed.
+Stage 6 has checked probability reliability and two recall-target policies.
+Sigmoid calibration is not adopted: the longer temporal check worsens, while
+the improving recent check has only one calibration day and one assessment day.
+Two exact raw-score cutoffs are recorded as provisional research choices;
+trusted probability percentages and operational alert thresholds remain
+unestablished. Pipeline freeze and final evaluation are still pending.
 
 ## Remaining milestones
 
@@ -34,7 +40,7 @@ has been performed.
 | 3. Error analysis | Error groups, input shifts and observation-quality concerns | Complete |
 | 4. Current-fire input comparison | Matched 16-input and 17-input logistic experiments | Complete |
 | 5. Main model comparison | Matched-input XGBoost comparison and temporal checks; stability remains unestablished | Complete |
-| 6. Probability and alert policy | Development-only reliability checks, justified calibration design and threshold trade-offs | Pending |
+| 6. Probability and alert policy | Reliability checks complete; calibration unadopted; provisional 80%/90% recall policies documented | Complete with limited evidence |
 | 7. Frozen final evaluation | Evaluate the chosen complete pipeline once on the protected temporal test | Pending |
 | 8. ML handover | Clear code, reproducible instructions, figures, limitations and review notes | In progress |
 
@@ -59,6 +65,9 @@ documented in [the project working agreements](AGENTS.md).
 - [Matched-input XGBoost results](reports/xgboost_comparison.md)
 - [Lesson 6: temporal stability and honest limits](docs/lesson_06_temporal_stability.md)
 - [Temporal diagnostics and forward-window results](reports/temporal_stability.md)
+- [Lesson 7: probability reliability and reminder cutoffs](docs/lesson_07_probability_and_thresholds.md)
+- [Probability diagnostics and threshold trade-offs](reports/probability_reliability.md)
+- [Draft research model and exact cutoffs](reports/draft_probability_policy.json)
 
 All repository-authored text, code comments and report figures use English.
 Raw data, row-level development data and holdout answers stay local.
@@ -77,6 +86,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m bushfire_ml.current_fire
 .\.venv\Scripts\python.exe -m bushfire_ml.xgboost_experiment
 .\.venv\Scripts\python.exe -m bushfire_ml.temporal_stability
+.\.venv\Scripts\python.exe -m bushfire_ml.probability_experiment
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
@@ -124,9 +134,11 @@ of 0.5, logistic regression gives 92 true positives, 140 false positives and 68
 false negatives. It has not established an improvement on these comparisons.
 This does not prove that environmental features lack predictive information.
 
-Error analysis, the current-fire comparison and temporal checks are complete.
-The next stage is a development-only probability/threshold procedure with an
-explicit assessment of whether usable time windows support calibration.
+Error analysis, the current-fire comparison, temporal checks and the probability/
+threshold assessment are complete. The next stage is a complete research pipeline
+freeze, including both provisional operating points, followed by one protected
+final evaluation. The calibration candidate is not adopted and the cutoffs
+do not establish an operational warning service.
 Continue to use explicit input whitelists and training-only preprocessing. Report average precision,
 precision/recall, probability quality and alert burden. Do not optimise accuracy
 alone or select a test period because it gives a preferred score.
@@ -137,9 +149,11 @@ The other rainfall and current-fire additions remain candidate experiments.
 The full extended feature set is blocked until its warm-up and unknown
 dry-history treatment are documented.
 
-Probability output will be `100 * P(next-day eligible detection)`. It needs
-out-of-sample calibration checks. A displayed percentage alone does not make
-an alert reliable. No percentage predictions are fabricated at this stage.
+The desired probability output is `100 * P(next-day eligible detection)`.
+Development-only checks do not yet establish trustworthy percentages, so the
+draft labels its output an experimental model score. Multiplication by 100
+does not make an alert reliable. Exact research cutoffs remain on the 0-1 scale;
+neither their recall targets nor future calibration improvements are guaranteed.
 
 ## References and disclosure
 
