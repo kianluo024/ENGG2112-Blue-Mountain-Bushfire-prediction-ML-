@@ -9,9 +9,9 @@ It is not a confirmed ignition, fire-spread simulation or operational warning.
 ## Current stage
 
 Stage 1 established data acceptance and a protected temporal holdout. Stage 2
-has fitted one prespecified core-feature logistic regression and compared it
-with prevalence and persistence on validation data only. The final test remains
-sealed; no final-test predictions or scores have been generated.
+fitted one prespecified core-feature logistic regression and compared it
+with prevalence and persistence on validation data only. Development stages
+1-6 did not generate final-test predictions or scores.
 Stage 3 examines the saved validation errors and source-observation caveats,
 without refitting or changing any labels.
 Stage 4 adds only the audited same-day fire flag to the logistic inputs, using
@@ -22,18 +22,22 @@ variant has validation AP 0.7283 versus persistence AP 0.7056, but exactly the
 same binary alerts at the fixed threshold of 0.5. Time-aware stability checks
 are now complete: early stopping is isolated from outer checking outcomes,
 but sparse early positives prevent two XGBoost fits, and the available windows
-do not establish stable improvement over persistence. No final-test evaluation
-has been performed.
+do not establish stable improvement over persistence.
 Stage 6 has checked probability reliability and two recall-target policies.
 Sigmoid calibration is not adopted: the longer temporal check worsens, while
 the improving recent check has only one calibration day and one assessment day.
 Two exact raw-score cutoffs are recorded as provisional research choices;
 trusted probability percentages and operational alert thresholds remain
 unestablished.
-Stage 7 now has an explicit final protocol and dedicated one-time release
-runner. Its freeze manifest must be committed before the runner can open final
-outcomes. The release receipt and final report record whether evaluation has
-actually completed; the presence of the runner alone does not establish that.
+Stage 7 is complete. The final protocol, model artifacts and both cutoffs were
+frozen in commit `ef45cdf` before the single authorised final release. On 7,783
+held-out cell-days with 49 positive targets, the 80% selection-recall policy
+achieves 32.7% recall with 39 false alerts; the 90% policy achieves 69.4% recall
+with 2,434 false alerts. Neither development recall target transfers to this
+period. XGBoost 17 AP is 0.1062, persistence AP is 0.0992 and the prespecified
+logistic 17 comparison has AP 0.2113. These findings do not establish a reliable
+warning system or calibrated probabilities. No model or cutoff was adjusted
+after release; future tuning requires new independent evaluation data.
 
 ## Remaining milestones
 
@@ -45,7 +49,7 @@ actually completed; the presence of the runner alone does not establish that.
 | 4. Current-fire input comparison | Matched 16-input and 17-input logistic experiments | Complete |
 | 5. Main model comparison | Matched-input XGBoost comparison and temporal checks; stability remains unestablished | Complete |
 | 6. Probability and alert policy | Reliability checks complete; calibration unadopted; provisional 80%/90% recall policies documented | Complete with limited evidence |
-| 7. Frozen final evaluation | Evaluate the chosen complete pipeline once on the protected temporal test | Pending |
+| 7. Frozen final evaluation | Committed freeze and single final evaluation; both policies and all comparisons reported | Complete |
 | 8. ML handover | Clear code, reproducible instructions, figures, limitations and review notes | In progress |
 
 Related development experiments can be run together and discussed at stage
@@ -74,6 +78,10 @@ documented in [the project working agreements](AGENTS.md).
 - [Draft research model and exact cutoffs](reports/draft_probability_policy.json)
 - [Lesson 8: freeze and perform one final evaluation](docs/lesson_08_frozen_final_evaluation.md)
 - [Final evaluation rules](config/final_evaluation_v1.json)
+- [Committed final freeze](reports/final_freeze.json)
+- [Final results and figure](reports/final_holdout.md)
+- [One-time release receipt](reports/final_release.json)
+- [Final interpretation and oral review notes](docs/final_findings.md)
 
 All repository-authored text, code comments and report figures use English.
 Raw data, row-level development data and holdout answers stay local.
@@ -103,6 +111,9 @@ The second command parses the protected final outcomes once. Later calls return
 the saved aggregate result without another holdout parse or prediction pass.
 Do not change the frozen pipeline after release; further tuning needs new
 independent evaluation data. See Lesson 8 for the exact procedure and caveats.
+This checkout has completed that release. A clone with the published receipt
+and aggregate report also returns cached results without needing the private
+model snapshots or raw data. Reformatting those results is not another blind test.
 
 `--dataset-root` must point to the supplied directory containing `model_ready`,
 `raw`, `processed` and the supplier metadata. The original dataset is never
@@ -136,7 +147,10 @@ summaries and scores are not produced by these development tools.
 
 The holdout is stored separately under ignored `.local_data/holdout/`.
 `load_development` rejects any partition except `train` and `validation`.
-File hashes detect later changes. This separation prevents accidental reuse;
+File hashes detect later changes. The one authorised final release has now
+completed; original seal records are preserved as historical preparation
+evidence and the release receipt records the later evaluation status.
+This separation prevents accidental development reuse;
 it is not encryption or an access-control boundary. For stronger independence,
 a teammate can retain the test file and run the final frozen evaluation.
 
@@ -148,11 +162,12 @@ of 0.5, logistic regression gives 92 true positives, 140 false positives and 68
 false negatives. It has not established an improvement on these comparisons.
 This does not prove that environmental features lack predictive information.
 
-Error analysis, the current-fire comparison, temporal checks and the probability/
-threshold assessment are complete. The next stage is a complete research pipeline
-freeze, including both provisional operating points, followed by one protected
-final evaluation. The calibration candidate is not adopted and the cutoffs
-do not establish an operational warning service.
+Error analysis, the current-fire comparison, temporal checks, the probability/
+threshold assessment and the single frozen final evaluation are complete.
+The remaining milestone is the ML handover and integration with the group
+report. The calibration candidate is not adopted and neither frozen cutoff
+establishes an operational warning service. The final test must not become
+a tuning set for further iterations of this project.
 Continue to use explicit input whitelists and training-only preprocessing. Report average precision,
 precision/recall, probability quality and alert burden. Do not optimise accuracy
 alone or select a test period because it gives a preferred score.
