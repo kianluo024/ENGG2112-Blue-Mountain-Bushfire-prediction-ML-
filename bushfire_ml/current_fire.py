@@ -12,8 +12,10 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import precision_recall_curve
 
-from .baselines import CONFIG_PATH as BASELINE_CONFIG, evaluate, fit_logistic, reliability_bins
+from .baselines import CONFIG_PATH as BASELINE_CONFIG
 from .data import LOCAL_ROOT, ROOT, load_development, model_matrix, read_protocol, sha256, verify_seal
+from .evaluation import evaluate, reliability_bins
+from .models import fit_logistic
 
 CONFIG_PATH = ROOT / "config" / "current_fire_v1.json"
 

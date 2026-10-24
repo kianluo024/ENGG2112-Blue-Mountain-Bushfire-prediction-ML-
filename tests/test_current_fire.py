@@ -7,9 +7,10 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from bushfire_ml.baselines import CONFIG_PATH as BASELINE_CONFIG, fit_logistic
+from bushfire_ml.baselines import CONFIG_PATH as BASELINE_CONFIG
 from bushfire_ml.current_fire import CONFIG_PATH, check_comparison_settings
 from bushfire_ml.data import model_matrix, read_protocol
+from bushfire_ml.models import fit_logistic
 
 
 class CurrentFireTests(unittest.TestCase):

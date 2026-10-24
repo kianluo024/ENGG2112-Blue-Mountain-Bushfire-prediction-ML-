@@ -6,8 +6,10 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from bushfire_ml.baselines import CONFIG_PATH, evaluate, fit_logistic, reliability_bins
+from bushfire_ml.baselines import CONFIG_PATH
 from bushfire_ml.data import model_matrix, read_protocol
+from bushfire_ml.evaluation import evaluate, reliability_bins
+from bushfire_ml.models import fit_logistic
 
 
 class BaselineTests(unittest.TestCase):

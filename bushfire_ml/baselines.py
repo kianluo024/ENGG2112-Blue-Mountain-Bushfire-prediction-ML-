@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import warnings
 from pathlib import Path
 
 import joblib
@@ -13,13 +12,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn
-from sklearn.exceptions import ConvergenceWarning
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import average_precision_score, brier_score_loss, confusion_matrix, log_loss, precision_recall_curve
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import precision_recall_curve
 
 from .data import LOCAL_ROOT, PROTOCOL_PATH, ROOT, load_development, model_matrix, read_protocol, sha256, verify_seal
+from .evaluation import evaluate, reliability_bins
+from .models import fit_logistic
 
 CONFIG_PATH = ROOT / "config" / "baseline_v1.json"
 MODEL_NAMES = {
@@ -27,67 +24,6 @@ MODEL_NAMES = {
     "persistence": "Fire persistence",
     "logistic_core": "Balanced logistic regression",
 }
-
-
-def fit_logistic(training: pd.DataFrame, config: dict) -> Pipeline:
-    """The fitting function receives training data only."""
-    predictors = model_matrix(training, config["feature_set"])
-    labels = training.fire_positive.astype(int)
-    if set(labels.unique()) != {0, 1}:
-        raise ValueError("Both classes must occur in the training partition")
-    pipeline = Pipeline([
-        ("scaler", StandardScaler()),
-        ("classifier", LogisticRegression(**config["logistic_regression"])),
-    ])
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", ConvergenceWarning)
-        pipeline.fit(predictors, labels)
-    return pipeline
-
-
-def evaluate(labels, scores, threshold: float, days: int, hard_rule: bool = False) -> dict:
-    labels = np.asarray(labels)
-    scores = np.asarray(scores, dtype=float)
-    if labels.size == 0 or labels.shape != scores.shape or not np.isfinite(scores).all():
-        raise ValueError("Nonempty labels and finite, equally sized scores are required")
-    if not set(np.unique(labels)).issubset({0, 1}) or not ((0 <= scores) & (scores <= 1)).all():
-        raise ValueError("Invalid binary labels or probabilities")
-    labels = labels.astype(int)
-    if days <= 0:
-        raise ValueError("The number of represented days must be positive")
-    predictions = (scores >= threshold).astype(int)
-    tn, fp, fn, tp = (int(value) for value in confusion_matrix(labels, predictions, labels=[0, 1]).ravel())
-    precision = tp/(tp+fp) if tp+fp else 0.0
-    recall = tp/(tp+fn) if tp+fn else None
-    return {
-        "rows": len(labels), "positive_cell_days": int(labels.sum()),
-        "average_precision": float(average_precision_score(labels, scores)) if labels.sum() else None,
-        "precision": precision, "recall": recall,
-        "f1": 2*precision*recall/(precision+recall) if recall is not None and precision+recall else 0.0,
-        "accuracy": (tp+tn)/len(labels), "false_positive_rate": fp/(fp+tn) if fp+tn else None,
-        "true_positives": tp, "false_positives": fp, "false_negatives": fn, "true_negatives": tn,
-        "alert_cell_days": tp+fp, "alerts_per_day": (tp+fp)/days,
-        "false_alerts_per_day": fp/days,
-        "brier_score": float(brier_score_loss(labels, scores)),
-        "log_loss": None if hard_rule else float(log_loss(labels, scores, labels=[0, 1])),
-        "score_mean": float(scores.mean()), "threshold": threshold,
-        "interpretation": "Hard binary rule; Brier is a 0/1 squared-error reference, not a calibrated probability" if hard_rule
-                          else "Uncalibrated probability estimate",
-        "zero_alert_precision_convention": "Precision is reported as zero when there are no alerts",
-    }
-
-
-def reliability_bins(labels, probabilities, bins: int) -> list[dict]:
-    labels, probabilities = np.asarray(labels), np.asarray(probabilities)
-    assignments = np.minimum((probabilities*bins).astype(int), bins-1)
-    results = []
-    for index in range(bins):
-        mask = assignments == index
-        if mask.any():
-            results.append({"lower": index/bins, "upper": (index+1)/bins,
-                            "rows": int(mask.sum()), "mean_probability": float(probabilities[mask].mean()),
-                            "observed_rate": float(labels[mask].mean())})
-    return results
 
 
 def make_figure(validation, scores, metrics, calibration, output: Path) -> None:
