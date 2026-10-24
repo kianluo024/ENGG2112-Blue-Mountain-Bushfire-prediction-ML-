@@ -20,7 +20,10 @@ not established a practical improvement over persistence.
 Stage 5 has completed the first matched-input XGBoost comparison. The 17-input
 variant has validation AP 0.7283 versus persistence AP 0.7056, but exactly the
 same binary alerts at the fixed threshold of 0.5. Time-aware stability checks
-remain pending, and no final-test evaluation has been performed.
+are now complete: early stopping is isolated from outer checking outcomes,
+but sparse early positives prevent two XGBoost fits, and the available windows
+do not establish stable improvement over persistence. No final-test evaluation
+has been performed.
 
 ## Remaining milestones
 
@@ -30,7 +33,7 @@ remain pending, and no final-test evaluation has been performed.
 | 2. Simple baselines | Prevalence, persistence and core logistic comparison | Complete |
 | 3. Error analysis | Error groups, input shifts and observation-quality concerns | Complete |
 | 4. Current-fire input comparison | Matched 16-input and 17-input logistic experiments | Complete |
-| 5. Main model comparison | First matched-input XGBoost comparison complete; time-aware stability checks remain | In progress |
+| 5. Main model comparison | Matched-input XGBoost comparison and temporal checks; stability remains unestablished | Complete |
 | 6. Probability and alert policy | Development-only reliability checks, justified calibration design and threshold trade-offs | Pending |
 | 7. Frozen final evaluation | Evaluate the chosen complete pipeline once on the protected temporal test | Pending |
 | 8. ML handover | Clear code, reproducible instructions, figures, limitations and review notes | In progress |
@@ -54,6 +57,8 @@ documented in [the project working agreements](AGENTS.md).
 - [Current-fire comparison](reports/current_fire_comparison.md)
 - [Lesson 5: understand XGBoost](docs/lesson_05_xgboost.md)
 - [Matched-input XGBoost results](reports/xgboost_comparison.md)
+- [Lesson 6: temporal stability and honest limits](docs/lesson_06_temporal_stability.md)
+- [Temporal diagnostics and forward-window results](reports/temporal_stability.md)
 
 All repository-authored text, code comments and report figures use English.
 Raw data, row-level development data and holdout answers stay local.
@@ -71,6 +76,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m bushfire_ml.error_analysis
 .\.venv\Scripts\python.exe -m bushfire_ml.current_fire
 .\.venv\Scripts\python.exe -m bushfire_ml.xgboost_experiment
+.\.venv\Scripts\python.exe -m bushfire_ml.temporal_stability
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
@@ -118,9 +124,10 @@ of 0.5, logistic regression gives 92 true positives, 140 false positives and 68
 false negatives. It has not established an improvement on these comparisons.
 This does not prove that environmental features lack predictive information.
 
-First interpret these errors and the input differences before adding complexity.
-Continue to use explicit input whitelists, training-only preprocessing and a
-development-only calibration/threshold procedure. Report average precision,
+Error analysis, the current-fire comparison and temporal checks are complete.
+The next stage is a development-only probability/threshold procedure with an
+explicit assessment of whether usable time windows support calibration.
+Continue to use explicit input whitelists and training-only preprocessing. Report average precision,
 precision/recall, probability quality and alert burden. Do not optimise accuracy
 alone or select a test period because it gives a preferred score.
 

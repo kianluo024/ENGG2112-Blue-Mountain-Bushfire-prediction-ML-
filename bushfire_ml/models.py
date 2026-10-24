@@ -50,3 +50,19 @@ def fit_xgboost(training: pd.DataFrame, validation: pd.DataFrame, config: dict, 
                           callbacks=[callback])
     model.fit(train_x, labels, eval_set=[(train_x, labels), (validation_x, validation.fire_positive)], verbose=False)
     return model
+
+
+def fit_xgboost_fixed(training: pd.DataFrame, config: dict, feature_set: str, tree_count: int):
+    """Refit a past-selected tree count without an evaluation set or callbacks."""
+    from xgboost import XGBClassifier
+
+    if not isinstance(tree_count, int) or not 1 <= tree_count <= config["xgboost"]["n_estimators"]:
+        raise ValueError("Tree count must be within the configured fitting budget")
+    labels = training.fire_positive.astype(int)
+    if set(labels.unique()) != {0, 1}:
+        raise ValueError("Both classes are needed in refitting data")
+    parameters = dict(config["xgboost"], n_estimators=tree_count)
+    model = XGBClassifier(**parameters,
+                          scale_pos_weight=float(labels.eq(0).sum()/labels.eq(1).sum()))
+    model.fit(model_matrix(training, feature_set), labels, verbose=False)
+    return model
