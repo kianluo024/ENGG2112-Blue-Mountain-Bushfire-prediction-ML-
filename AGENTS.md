@@ -37,6 +37,11 @@
   percentages. Do not promise calibrated probabilities from raw model scores.
 - Freeze the complete selected pipeline before the final holdout evaluation.
   Report disappointing results honestly and do not tune against that test.
+- Kian explicitly authorised one final evaluation after freezing both research
+  cutoffs. Only the dedicated final-release runner may parse holdout outcomes,
+  after verifying the committed freeze and recording the one-time release.
+  Development loaders remain restricted. Later use of cached results is not
+  a new blind evaluation; any future tuning needs new independent data.
 
 ## Git commits
 

@@ -29,7 +29,11 @@ Sigmoid calibration is not adopted: the longer temporal check worsens, while
 the improving recent check has only one calibration day and one assessment day.
 Two exact raw-score cutoffs are recorded as provisional research choices;
 trusted probability percentages and operational alert thresholds remain
-unestablished. Pipeline freeze and final evaluation are still pending.
+unestablished.
+Stage 7 now has an explicit final protocol and dedicated one-time release
+runner. Its freeze manifest must be committed before the runner can open final
+outcomes. The release receipt and final report record whether evaluation has
+actually completed; the presence of the runner alone does not establish that.
 
 ## Remaining milestones
 
@@ -68,6 +72,8 @@ documented in [the project working agreements](AGENTS.md).
 - [Lesson 7: probability reliability and reminder cutoffs](docs/lesson_07_probability_and_thresholds.md)
 - [Probability diagnostics and threshold trade-offs](reports/probability_reliability.md)
 - [Draft research model and exact cutoffs](reports/draft_probability_policy.json)
+- [Lesson 8: freeze and perform one final evaluation](docs/lesson_08_frozen_final_evaluation.md)
+- [Final evaluation rules](config/final_evaluation_v1.json)
 
 All repository-authored text, code comments and report figures use English.
 Raw data, row-level development data and holdout answers stay local.
@@ -89,6 +95,14 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m bushfire_ml.probability_experiment
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
+
+Final release is a separate authorised step. First run
+`python -m bushfire_ml.freeze_final`, review and commit the complete freeze,
+then run `python -m bushfire_ml.final_release` with the same local environment.
+The second command parses the protected final outcomes once. Later calls return
+the saved aggregate result without another holdout parse or prediction pass.
+Do not change the frozen pipeline after release; further tuning needs new
+independent evaluation data. See Lesson 8 for the exact procedure and caveats.
 
 `--dataset-root` must point to the supplied directory containing `model_ready`,
 `raw`, `processed` and the supplier metadata. The original dataset is never
