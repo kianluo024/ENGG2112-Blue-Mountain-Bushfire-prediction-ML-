@@ -23,7 +23,7 @@ class HandoverTests(unittest.TestCase):
         self.assertEqual(len(pages), 4)
 
     def test_exported_model_table_and_claims_match_exact_sources(self):
-        final = json.loads((ROOT / "reports/final_holdout.json").read_text())
+        final = json.loads((ROOT / "research/reports/final_holdout.json").read_text())
         check_model_table(ROOT, final)
         self.assertGreater(check_claims(ROOT), 100)
 
@@ -41,12 +41,12 @@ class HandoverTests(unittest.TestCase):
                 contained(root, "../outside.txt")
 
     def test_altered_csv_is_detected_without_reading_private_data(self):
-        final = json.loads((ROOT / "reports/final_holdout.json").read_text())
+        final = json.loads((ROOT / "research/reports/final_holdout.json").read_text())
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            folder = root / "handover/tables"
+            folder = root / "report/tables"
             folder.mkdir(parents=True)
-            with (ROOT / "handover/tables/final_models.csv").open(newline="") as stream:
+            with (ROOT / "report/tables/final_models.csv").open(newline="") as stream:
                 rows = list(csv.DictReader(stream))
             next(row for row in rows if row["model"] == "xgboost_17")["average_precision"] = "0.999"
             with (folder / "final_models.csv").open("w", newline="") as stream:

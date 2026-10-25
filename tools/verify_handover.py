@@ -46,10 +46,10 @@ def check_links(root, paths):
 
 
 def check_claims(root):
-    catalogue = json.loads((root / "handover/evidence/claims.json").read_text())
+    catalogue = json.loads((root / "docs/evidence/claims.json").read_text())
     sources = {}
     for claim in catalogue["claims"]:
-        if claim["source"] not in {"reports/final_holdout.json", "reports/final_freeze.json"}:
+        if claim["source"] not in {"research/reports/final_holdout.json", "research/reports/final_freeze.json"}:
             raise ValueError("A numerical claim must use a declared aggregate source")
         if claim["source"] not in sources:
             sources[claim["source"]] = json.loads((root / claim["source"]).read_text())
@@ -66,7 +66,7 @@ def check_claims(root):
 
 
 def check_model_table(root, final):
-    with (root / "handover/tables/final_models.csv").open(encoding="utf-8", newline="") as stream:
+    with (root / "report/tables/final_models.csv").open(encoding="utf-8", newline="") as stream:
         rows = list(csv.DictReader(stream))
     if [row["model"] for row in rows] != list(final["all_rows"]["models"]):
         raise ValueError("The exported model table omits or reorders a comparison")
@@ -86,7 +86,7 @@ def check_records(path, expected):
 
 
 def check_tables(root, final, frozen):
-    folder = root / "handover/tables"
+    folder = root / "report/tables"
     check_model_table(root, final)
     fields = ["average_precision", "precision", "recall", "accuracy", "brier_score", "log_loss",
               "true_positives", "false_positives", "false_negatives", "true_negatives", "alerts_per_day", "false_alerts_per_day"]
@@ -100,12 +100,12 @@ def check_tables(root, final, frozen):
                 for month in final["monthly"] for key, row in month["all_rows"]["policies"].items()]
     check_records(folder / "monthly_policies.csv", expected)
     check_records(folder / "reliability_bins.csv", final["all_rows"]["models"]["xgboost_17"]["reliability_bins"])
-    history = json.loads((root / "reports/xgboost_comparison.json").read_text())
+    history = json.loads((root / "research/reports/xgboost_comparison.json").read_text())
     expected = [{"evidence_scope": "development validation used for original tree selection", "model": key,
                  **{field: row[field] for field in fields}} for key, row in history["validation_metrics"].items()]
     check_records(folder / "development_summary.csv", expected)
-    partitions = json.loads((root / "reports/partition_manifest.json").read_text())["partitions"]
-    protocol = json.loads((root / "config/protocol_v1.json").read_text())
+    partitions = json.loads((root / "research/reports/partition_manifest.json").read_text())["partitions"]
+    protocol = json.loads((root / "research/config/protocol_v1.json").read_text())
     expected = [{"partition": key, **partitions[key]} for key in ["train", "validation", "final_test"]]
     gap_rows = protocol["gap_days"]*len(frozen["grid_ids"])
     expected += [{"partition": "gap_before_validation", "rows": gap_rows, "first_feature_date": "2019-12-09", "last_feature_date": "2019-12-15"},
@@ -115,27 +115,28 @@ def check_tables(root, final, frozen):
 
 
 def verify(root=ROOT, local_artifacts=False):
-    frozen = json.loads((root / "reports/final_freeze.json").read_text())
-    receipt = json.loads((root / "reports/final_release.json").read_text())
-    final = json.loads((root / "reports/final_holdout.json").read_text())
+    frozen = json.loads((root / "research/reports/final_freeze.json").read_text())
+    receipt = json.loads((root / "research/reports/final_release.json").read_text())
+    final = json.loads((root / "research/reports/final_holdout.json").read_text())
     if receipt["status"] != "completed" or receipt["evaluation_runs"] != 1 or receipt["test_csv_reads"] != 1:
         raise ValueError("The release receipt must record exactly one completed evaluation")
-    if sha(root / "reports/final_holdout.json") != receipt["aggregate_sha256"]:
+    if sha(root / "research/reports/final_holdout.json") != receipt["aggregate_sha256"]:
         raise ValueError("Final aggregate no longer matches its release receipt")
-    if sha(root / "reports/final_freeze.json", text=True) != receipt["freeze_manifest_sha256"]:
+    if sha(root / "research/reports/final_freeze.json", text=True) != receipt["freeze_manifest_sha256"]:
         raise ValueError("The committed freeze manifest changed")
     if final["frozen_policies"] != frozen["policies"] or final["fitting_performed"] or final["thresholds_adjusted_after_release"]:
         raise ValueError("Final model-selection integrity failed")
-    check_hashes(root, frozen["source_hashes"])
-    check_hashes(root, frozen["development_reference_hashes"])
-    manifest = json.loads((root / "handover/manifest.json").read_text())
+    check_hashes(root / "research", frozen["source_hashes"])
+    check_hashes(root / "research", frozen["development_reference_hashes"])
+    manifest = json.loads((root / "docs/evidence/delivery_manifest.json").read_text())
     check_hashes(root, manifest["sources"])
     for relative, spec in manifest["files"].items():
         check_hashes(root, {relative: spec["sha256"]}, text=spec["mode"] == "text_lf")
     claims = check_claims(root)
     tables = check_tables(root, final, frozen)
-    markdown = [root / "README.md", * (root / "handover").rglob("*.md")]
-    markdown += [root / directory / "README.md" for directory in ["bushfire_ml", "config", "reports", "docs", "tests", "tools"]]
+    markdown = [root / "README.md", root / "AGENTS.md"]
+    for directory in ["research", "report", "docs", "tests", "tools"]:
+        markdown += list((root / directory).rglob("*.md"))
     links = check_links(root, markdown)
     if local_artifacts:
         for spec in frozen["models"].values():

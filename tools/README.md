@@ -1,14 +1,15 @@
-# Delivery tools
+# Delivery utilities
 
-These scripts package and verify the completed research. They do not alter
-frozen source or read `.local_data/` unless the verifier's explicit hash-only
-private-artifact option is selected.
+Use [review.py](../review.py) at the repository root for normal review.
+The scripts here implement aggregate-only export and verification.
 
-| Script | Inputs | Outputs |
-| --- | --- | --- |
-| [build_handover.py](build_handover.py) | Explicitly listed aggregate JSON and configurations | Shared report content, Markdown/LaTeX, CSV tables, figures, feature/claim indexes and manifest |
-| [render_handover_pdf.py](render_handover_pdf.py) | Structured report content and exported figures | Reviewed ML contribution PDF; refreshes package hashes |
-| [verify_handover.py](verify_handover.py) | Frozen hashes, final receipt, aggregate JSON, package files and links | Public integrity/claim checks; optional private byte-hash verification |
+| Script | Purpose |
+| --- | --- |
+| [build_handover.py](build_handover.py) | Export report text, LaTeX, tables, figures and source indexes from public aggregates |
+| [render_handover_pdf.py](render_handover_pdf.py) | Render the shared report content into the reading PDF |
+| [verify_handover.py](verify_handover.py) | Check unchanged research hashes, release identity, exports and links |
+| [requirements-report.txt](requirements-report.txt) | Optional PDF-export dependencies |
 
-See the [runbook](../handover/technical/runbook.md). The source-of-truth numbers
-remain in `reports/`; exporting them is not another final evaluation.
+See the [runbook](../docs/technical/runbook.md). Source-of-truth measurements
+remain in `research/reports/`. Export scripts do not read raw data, predict or fit.
+Only explicit optional verification reads private files, and only as bytes.

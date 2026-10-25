@@ -1,20 +1,14 @@
-# Verification index
+# Delivery and review tests
 
-The checks use synthetic data or configuration/fixture files. They do not
-need private raw data and do not repeat the final holdout evaluation.
+This suite checks aggregate-derived exports, numerical provenance, broken links,
+tampered CSVs and the root review entry point. Original scientific checks live
+in [research/tests/](../research/tests/README.md).
 
-| Test module | Consequential behaviour checked |
-| --- | --- |
-| [test_data_guards.py](test_data_guards.py) | Chronological boundaries, excluded predictors and sealed-file tampering |
-| [test_baselines.py](test_baselines.py) | Metrics, denominators and training-only preprocessing |
-| [test_current_fire.py](test_current_fire.py) | Exactly one audited additional input and matched settings |
-| [test_xgboost.py](test_xgboost.py) | Training-only class weights, AP maximisation and native model persistence |
-| [test_temporal_stability.py](test_temporal_stability.py) | Calendar gaps, missing classes, fixed-tree refitting and outer-answer isolation |
-| [test_probability.py](test_probability.py) | Natural-prevalence calibration, tied cutoffs and assessment-answer isolation |
-| [test_final_release.py](test_final_release.py) | Committed freeze, one-time access, cached recovery and exact cutoff replay |
-| [test_handover.py](test_handover.py) | Package integrity, aggregate provenance and absence of raw-data dependencies |
+- [test_handover.py](test_handover.py): report values come from evidence;
+  altered CSVs, undefined-metric substitutions and invalid links are detected.
+- [test_review.py](test_review.py): cached-result access rejects incomplete or
+  tampered records, avoids private data and works from another directory.
 
-Run `python -m unittest discover -s tests -v`. The original 48 checks passed
-before final release. New packaging checks are additional; they do not alter
-the frozen original test files or convert the final test back into development
-data.
+Run both suites with `python review.py test` from the repository root after
+installing `research/requirements.txt`. Tests use synthetic fixtures or public
+aggregates; they do not repeat final prediction or parse private labels.

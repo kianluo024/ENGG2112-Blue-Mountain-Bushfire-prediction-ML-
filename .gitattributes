@@ -12,4 +12,4 @@
 *.pdf binary
 
 # Preserve the exact released aggregate bytes recorded in the release receipt.
-reports/final_holdout.json -text -eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+research/reports/final_holdout.json -text -eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

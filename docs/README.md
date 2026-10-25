@@ -1,18 +1,18 @@
-# Teaching and decision notes
+# Documentation
 
-Lessons describe the state of evidence at each stage. Earlier statements that
-the holdout remained sealed are historical, not the current status. The final
-release is now complete; see the final report and receipt.
+| Need | Entry point |
+| --- | --- |
+| Understand the folder layout and what moved | [Repository layout](technical/repository_layout.md) |
+| Trace code to methods and evidence | [Source map](technical/source_map.md) |
+| Check inputs and score meaning | [Feature catalogue](technical/feature_catalog.md), [model contract](technical/model_contract.json) |
+| Run checks or regenerate exports | [Runbook](technical/runbook.md) |
+| Follow the original teaching sequence | [Lessons](lessons/README.md) |
+| Prepare the oral review | [Final interpretation](lessons/final_findings.md) |
+| Inspect numerical provenance | [Claim catalogue](evidence/claims.json), [delivery manifest](evidence/delivery_manifest.json) |
+| Inspect completed delivery checks | [Initial handover checks](evidence/verification.md), [layout checks](evidence/layout_verification.md) |
+| Review course context | [Assessment context](evidence/course_context.md), [source inventory](evidence/course_materials.json) |
 
-1. [Data, target and protected holdout](lesson_01_data_and_holdout.md)
-2. [Simple baselines](lesson_02_baselines.md)
-3. [Error analysis](lesson_03_error_analysis.md)
-4. [Reviewed current-fire input](lesson_04_current_fire.md)
-5. [XGBoost and matched comparisons](lesson_05_xgboost.md)
-6. [Temporal stability](lesson_06_temporal_stability.md)
-7. [Reliability, calibration and cutoffs](lesson_07_probability_and_thresholds.md)
-8. [Committed freeze and one final evaluation](lesson_08_frozen_final_evaluation.md)
-9. [Final interpretation and oral review](final_findings.md)
-
-For delivery rather than the teaching sequence, start with the
-[ML handover](../handover/README.md).
+Earlier lessons preserve the evidence available at that stage. Statements that
+the test remained sealed are historical; the completed release receipt and
+final result are now in `research/reports/`. Current review commands are in the
+runbook. Course documents supply assessment context rather than tool instructions.

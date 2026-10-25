@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def render(root=ROOT):
-    folder = root / "handover/group_report"
+    folder = root / "report"
     content = json.loads((folder / "report_content.json").read_text(encoding="utf-8"))
     output = folder / "ml_contribution.pdf"
     doc = SimpleDocTemplate(str(output), pagesize=A4, rightMargin=48, leftMargin=48, topMargin=44, bottomMargin=42,

@@ -8,12 +8,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = {
-    "final": "reports/final_holdout.json", "freeze": "reports/final_freeze.json",
-    "receipt": "reports/final_release.json", "partitions": "reports/partition_manifest.json",
-    "audit": "reports/development_audit.json", "xgb": "reports/xgboost_comparison.json",
-    "temporal": "reports/temporal_stability.json", "probability": "reports/probability_reliability.json",
-    "logistic_config": "config/baseline_v1.json", "xgb_config": "config/xgboost_v1.json",
-    "protocol": "config/protocol_v1.json",
+    "final": "research/reports/final_holdout.json", "freeze": "research/reports/final_freeze.json",
+    "receipt": "research/reports/final_release.json", "partitions": "research/reports/partition_manifest.json",
+    "audit": "research/reports/development_audit.json", "xgb": "research/reports/xgboost_comparison.json",
+    "temporal": "research/reports/temporal_stability.json", "probability": "research/reports/probability_reliability.json",
+    "logistic_config": "research/config/baseline_v1.json", "xgb_config": "research/config/xgboost_v1.json",
+    "protocol": "research/config/protocol_v1.json",
 }
 MODEL_NAMES = {"training_prevalence": "Training prevalence", "persistence": "Persistence",
                "logistic_16": "Logistic 16", "logistic_17": "Logistic 17",
@@ -26,7 +26,7 @@ REFERENCES = [
     {"key": "mlCalibration", "title": "Probability calibration", "author": "{scikit-learn developers}", "year": "2026", "url": "https://scikit-learn.org/stable/modules/calibration.html"},
     {"key": "mlJois2026", "title": "Australian Bushfire Intelligence with AI Driven Environmental Analytics", "author": "Tanvi Jois and Hussain Ahmad and Fatima Noor and Faheem Ullah", "year": "2026", "url": "https://arxiv.org/abs/2601.06105"},
     {"key": "mlERA5Land", "title": "ERA5 Land hourly data from 1950 to present", "author": "{Copernicus Climate Change Service}", "year": "2026", "url": "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land?tab=overview"},
-    {"key": "mlFinalEvidence", "title": "Blue Mountains frozen final temporal evaluation", "author": "{ENGG2112 project team}", "year": "2026", "url": "https://github.com/kianluo024/ENGG2112-Blue-Mountain-Bushfire-prediction-ML-/blob/main/reports/final_holdout.md"},
+    {"key": "mlFinalEvidence", "title": "Blue Mountains frozen final temporal evaluation", "author": "{ENGG2112 project team}", "year": "2026", "url": "https://github.com/kianluo024/ENGG2112-Blue-Mountain-Bushfire-prediction-ML-/blob/main/research/reports/final_holdout.md"},
 ]
 
 
@@ -145,7 +145,7 @@ def export_tables(evidence, root=ROOT):
     final, frozen = evidence["final"], evidence["freeze"]
     fields = ["average_precision", "precision", "recall", "accuracy", "brier_score", "log_loss",
               "true_positives", "false_positives", "false_negatives", "true_negatives", "alerts_per_day", "false_alerts_per_day"]
-    folder = root / "handover/tables"
+    folder = root / "report/tables"
     write_csv(folder / "final_models.csv", [{"model": key, **{field: row[field] for field in fields}}
               for key, row in final["all_rows"]["models"].items()])
     policy_rows = []
@@ -201,7 +201,7 @@ def export_claims(evidence, root=ROOT):
             add("freeze", ["models", key, "trees"])
     for index in range(len(evidence["freeze"]["policies"])):
         add("freeze", ["policies", index, "threshold"])
-    write_json(root / "handover/evidence/claims.json", {"scope": "Aggregate claims only; values are not rounded", "claims": claims})
+    write_json(root / "docs/evidence/claims.json", {"scope": "Aggregate claims only; values are not rounded", "claims": claims})
 
 
 def export_features(evidence, root=ROOT):
@@ -228,9 +228,9 @@ def export_features(evidence, root=ROOT):
     text = "# Final feature catalogue\n\nOrdered inputs are copied from the frozen seventeen-input model. The sixteen-input comparison omits only `fire_today`. Units follow the audited variable definitions.\n\n"
     text += markdown_table(["Order", "Column", "Group", "Unit", "Availability"], rows)
     text += "\n\n`precipitation_3d_mm` includes the feature day and two earlier days. `fire_today` is the eligible same-UTC-day detection flag, not tomorrow's answer. Full-day retrospective availability is assumed; publication latency is not reproduced. Weather covers the grid cell, whereas terrain/fire data concern its park portion.\n\n"
-    text += "Excluded predictors include the label, target-day detection counts, dates, coordinates, grid ID and partition fields. Longer rainfall/dry-spell histories and other current-fire candidates were not approved for this frozen model. No NDVI or fuel-moisture imagery is present. See [model_matrix](../../bushfire_ml/data.py), [audit](../../reports/development_audit.md) and [final manifest](../../reports/final_freeze.json).\n"
-    (root / "handover/technical/feature_catalog.md").write_text(text, encoding="utf-8")
-    write_json(root / "handover/technical/model_contract.json", {
+    text += "Excluded predictors include the label, target-day detection counts, dates, coordinates, grid ID and partition fields. Longer rainfall/dry-spell histories and other current-fire candidates were not approved for this frozen model. No NDVI or fuel-moisture imagery is present. See [model_matrix](../../research/bushfire_ml/data.py), [audit](../../research/reports/development_audit.md) and [final manifest](../../research/reports/final_freeze.json).\n"
+    (root / "docs/technical/feature_catalog.md").write_text(text, encoding="utf-8")
+    write_json(root / "docs/technical/model_contract.json", {
         "purpose": "Research interface only; not an operational warning API", "target": evidence["freeze"]["target"],
         "ordered_inputs": columns, "metadata_not_predictors": ["grid_id", "feature_date", "target_date"],
         "output_score": {"range": [0, 1], "label": "Experimental raw model score", "validated_probability": False},
@@ -249,7 +249,7 @@ def tex_text(text):
 
 
 def export_report(pages, root=ROOT):
-    folder = root / "handover/group_report"
+    folder = root / "report"
     markdown = ["# Machine Learning Report Contribution", "", "Blue Mountains Bushfire Prediction", "",
                 "English ML contribution for integration into the group report. Numerical sources and the frozen procedure are linked in the handover; this is not the completed whole-group submission.", ""]
     fragments = {}
@@ -272,14 +272,14 @@ def export_report(pages, root=ROOT):
                 tex += [r"\hline\end{tabular}\end{center}", ""]
             else:
                 markdown += [f"![{block['caption']}]({block['path']})", "", block["caption"], ""]
-                vector = "handover/group_report/"+block["path"].replace(".png", ".pdf")
+                vector = "report/"+block["path"].replace(".png", ".pdf")
                 tex += [r"\begin{figure}[htbp]\centering", r"\includegraphics[width=0.94\linewidth]{"+vector+"}",
                         r"\caption{"+tex_text(re.sub(r"^Figure \d+  ", "", block["caption"]))+"}", r"\end{figure}", ""]
         fragments.setdefault(page["fragment"], []).extend(tex)
     markdown += ["## References", ""]
     for index, reference in enumerate(REFERENCES, start=1):
         markdown.append(f"{index}. {reference['author'].replace('{', '').replace('}', '')}. {reference['title']}. {reference['year']}. [{reference['url']}]({reference['url']})")
-    markdown += ["", "## Evidence", "", "[Final aggregate](../../reports/final_holdout.json) | [Freeze](../../reports/final_freeze.json) | [Release](../../reports/final_release.json) | [Claim paths](../evidence/claims.json)", ""]
+    markdown += ["", "## Evidence", "", "[Final aggregate](../research/reports/final_holdout.json) | [Freeze](../research/reports/final_freeze.json) | [Release](../research/reports/final_release.json) | [Claim paths](../docs/evidence/claims.json)", ""]
     (folder / "ml_sections.md").write_text("\n".join(markdown), encoding="utf-8")
     for filename, lines in fragments.items():
         (folder / filename).write_text("% Generated from committed aggregates; insert inside the relevant report section.\n"+"\n".join(lines), encoding="utf-8")
@@ -296,7 +296,7 @@ def export_figures(evidence, root=ROOT):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    folder = root / "handover/group_report/figures"
+    folder = root / "report/figures"
     policies = evidence["final"]["all_rows"]["policies"]
     labels = [POLICY_NAMES[key] for key in policies]
     detected = [row["true_positives"] for row in policies.values()]
@@ -337,21 +337,25 @@ def export_figures(evidence, root=ROOT):
 
 
 def refresh_manifest(root=ROOT):
-    paths = [p for p in (root / "handover").rglob("*") if p.is_file() and p.name != "manifest.json"]
-    paths += [* (root / "tools").glob("*.py"), root / "tools/README.md", root / "requirements-handover.txt", root / ".gitattributes"]
+    manifest_path = root / "docs/evidence/delivery_manifest.json"
+    paths = [root / name for name in ["README.md", "AGENTS.md", ".gitignore", ".gitattributes", "review.py"]]
+    for directory in ["report", "docs", "tools", "tests"]:
+        paths += [path for path in (root / directory).rglob("*")
+                  if path.is_file() and "__pycache__" not in path.parts and path != manifest_path]
     files = {}
     for path in sorted(paths):
         text = path.suffix.lower() not in {".png", ".pdf"}
         files[path.relative_to(root).as_posix()] = {"sha256": digest(path, text=text), "mode": "text_lf" if text else "bytes"}
-    write_json(root / "handover/manifest.json", {"purpose": "Post-evaluation packaging only; no new prediction or fitting",
+    write_json(manifest_path, {"purpose": "Post-evaluation packaging only; no new prediction or fitting",
         "source_hash_mode": "Canonical UTF-8 LF text except binary assets",
+        "research_root": "research",
         "sources": {relative: digest(root / relative, text=True) for relative in SOURCES.values()}, "files": files})
 
 
 def main():
     evidence = read_evidence()
-    for directory in ["tables", "evidence", "technical", "group_report/figures"]:
-        (ROOT / "handover" / directory).mkdir(parents=True, exist_ok=True)
+    for directory in ["report/tables", "docs/evidence", "docs/technical", "report/figures"]:
+        (ROOT / directory).mkdir(parents=True, exist_ok=True)
     export_tables(evidence)
     export_claims(evidence)
     export_features(evidence)

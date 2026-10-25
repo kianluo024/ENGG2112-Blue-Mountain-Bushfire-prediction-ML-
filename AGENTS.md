@@ -56,3 +56,14 @@
 - Keep raw data, row-level answers/predictions, local models, environments and
   credentials out of Git. Verify the staged file list before committing.
 - Do not claim a commit or push happened unless the command succeeded.
+
+## Repository layout
+
+- Keep the evaluated workspace together under `research/`. Frozen manifest
+  paths are relative to that folder; do not edit frozen Python, settings or tests.
+- Put group report material in `report/`, methods/lessons/provenance in `docs/`,
+  delivery utilities in `tools/` and delivery tests in root `tests/`.
+- Use `python review.py results`, `python review.py verify` and
+  `python review.py test` as the current public review workflow.
+- Root `.local_data/` retains private artifacts. Optional verification hashes
+  those files without parsing labels or repeating prediction.
